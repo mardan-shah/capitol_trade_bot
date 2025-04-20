@@ -1,0 +1,26 @@
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Environment variables
+.env
+
+# Logs
+*.log
+
+# macOS and system files
+.DS_Store
+Thumbs.db
+
+# VSCode/IDE config
+.vscode/
+.idea/
+
+# Docker artifacts
+*.tar
