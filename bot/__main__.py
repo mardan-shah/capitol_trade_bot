@@ -31,7 +31,7 @@ HEADERS = {
 }
 SEMAPHORE_LIMIT = 10 # Max concurrent profile page fetches
 MAX_PAGES_TO_SCAN = 3 # Max politician *listing* pages to check per cycle
-POLLING_INTERVAL_SECONDS = 600  # 10 minutes between scan cycles
+POLLING_INTERVAL_SECONDS = 3600  # 10 minutes between scan cycles
 DB_CONNECTION_TIMEOUT_MS = 5000 # Timeout for MongoDB connection attempt
 REQUEST_TIMEOUT_SECONDS = 30 # Timeout for HTTP requests
 
