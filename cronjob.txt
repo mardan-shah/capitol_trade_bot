@@ -1,1 +1,1 @@
-*/5 * * * * cd / && /venv/bin/python -m bot >> /logs/cron.log 2>&1
+*/5 * * * * /venv/bin/python -m bot >> /logs/cron.log 2>&1

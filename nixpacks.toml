@@ -3,17 +3,14 @@ nixPkgs = ["python311", "curl", "coreutils", "cron"]
 
 [phases.install]
 cmds = [
-  "python3 -m venv /venv",
-  "/venv/bin/pip install -r requirements.txt"
+  "curl -Lo /usr/local/bin/supercronic https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-amd64",
+  "chmod +x /usr/local/bin/supercronic"
 ]
 
 [phases.build]
 cmds = [
-  "mkdir -p /logs",
-  "cp cronjob.txt /etc/cron.d/bot",
-  "chmod 0644 /etc/cron.d/bot",
-  "crontab /etc/cron.d/bot"
+  "mkdir -p /logs"
 ]
 
 [start]
-cmd = "cron -f"
+cmd = "supercronic /cronjob.txt"
