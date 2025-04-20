@@ -1,16 +1,12 @@
-[phases.setup]
-nixPkgs = ["python311", "curl", "coreutils", "cron"]
+[build]
+nixpkgs = ["python311", "curl", "coreutils"]
 
-[phases.install]
+[phases.setup]
 cmds = [
   "curl -Lo /usr/local/bin/supercronic https://github.com/aptible/supercronic/releases/latest/download/supercronic-linux-amd64",
-  "chmod +x /usr/local/bin/supercronic"
-]
-
-[phases.build]
-cmds = [
+  "chmod +x /usr/local/bin/supercronic",
   "mkdir -p /logs"
 ]
 
 [start]
-cmd = "supercronic /cronjob.txt"
+cmd = "/usr/local/bin/supercronic /cronjob.txt"
