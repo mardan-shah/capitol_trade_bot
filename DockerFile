@@ -1,16 +1,44 @@
-FROM python:3.12.6
+# syntax=docker/dockerfile:1
 
-# Create app directory
+FROM python:3.12-slim AS base
+
+# Set workdir for all stages
 WORKDIR /app
 
-# Copy only what's needed
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Builder stage: install dependencies into a venv
+FROM base AS builder
 
-COPY . .
-COPY cronjob.txt /cronjob.txt
+# Bind requirements.txt for pip install, use cache for pip
+COPY --link requirements.txt ./
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m venv .venv && \
+    .venv/bin/pip install --upgrade pip && \
+    .venv/bin/pip install -r requirements.txt
 
-# Load env variables from .env
+# Copy application code (excluding .env, venv, .git, etc.)
+COPY --link bot/ ./bot/
+COPY --link Procfile ./Procfile
+#COPY --link .gitignore ./.gitignore
+
+
+# Final stage: copy venv and app, set up non-root user
+FROM base AS final
+
+# Create non-root user and group
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+
+# Copy venv and app from builder
+COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /app/bot /app/bot
+COPY --from=builder /app/Procfile /app/Procfile
+#COPY --from=builder /app/.gitignore /app/.gitignore
+
+# Set environment for venv and python
+ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
 
+# Switch to non-root user
+USER appuser
+
+# Entrypoint: run the bot module
 CMD ["python", "-m", "bot"]

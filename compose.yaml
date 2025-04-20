@@ -1,0 +1,19 @@
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: DockerFile
+    restart: unless-stopped
+    init: true
+    # env_file: ./.env  # Uncomment if .env file exists
+    # If your bot requires external services (e.g., a database), add them below and configure depends_on
+    # ports:  # Uncomment and specify if your bot exposes any ports
+    #   - "8080:8080"
+    # Add volumes if your bot needs to persist data
+    # volumes:
+    #   - bot_data:/app/data
+
+# No external services (databases, caches, etc.) detected from the provided context.
+# If your application requires them, add the relevant service blocks here.
+
+# No volumes section included, as no persistent data volumes are required.
