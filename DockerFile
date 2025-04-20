@@ -8,6 +8,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+COPY cronjob.txt /cronjob.txt
 
 # Load env variables from .env
 ENV PYTHONUNBUFFERED=1
