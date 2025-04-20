@@ -1,0 +1,19 @@
+[phases.setup]
+nixPkgs = ["python311", "curl", "coreutils", "cron"]
+
+[phases.install]
+cmds = [
+  "python3 -m venv /venv",
+  "/venv/bin/pip install -r requirements.txt"
+]
+
+[phases.build]
+cmds = [
+  "mkdir -p /logs",
+  "cp cronjob.txt /etc/cron.d/bot",
+  "chmod 0644 /etc/cron.d/bot",
+  "crontab /etc/cron.d/bot"
+]
+
+[start]
+cmd = "cron -f"
