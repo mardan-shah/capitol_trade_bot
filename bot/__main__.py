@@ -9,6 +9,8 @@ import os
 import time
 from dotenv import load_dotenv
 import sys # Import sys for checking Python version potentially
+import glob
+from datetime import datetime, timedelta
 
 # --- Logging Setup ---
 # Define log format with aligned levels
@@ -31,7 +33,7 @@ HEADERS = {
 }
 SEMAPHORE_LIMIT = 10 # Max concurrent profile page fetches
 MAX_PAGES_TO_SCAN = 3 # Max politician *listing* pages to check per cycle
-POLLING_INTERVAL_SECONDS = 3600  # 10 minutes between scan cycles
+POLLING_INTERVAL_SECONDS = 3600  # 1 hour between scan cycles
 DB_CONNECTION_TIMEOUT_MS = 5000 # Timeout for MongoDB connection attempt
 REQUEST_TIMEOUT_SECONDS = 30 # Timeout for HTTP requests
 
@@ -593,9 +595,26 @@ def run_once():
     return total_cycle_created, total_cycle_trade_updates + total_cycle_meta_updates
 
 
+def cleanup_old_logs():
+    """Deletes logs older than the specified number of days."""
+    LOG_DIR = os.path.dirname(os.path.abspath(__file__))
+    LOG_PATTERN = os.path.join(LOG_DIR, "capitol_trades_bot*.log*")  # Handles rotated logs if any
+    DAYS_TO_KEEP = 15
+
+    cutoff = datetime.now() - timedelta(days=DAYS_TO_KEEP)
+    for log_path in glob.glob(LOG_PATTERN):
+        try:
+            mtime = datetime.fromtimestamp(os.path.getmtime(log_path))
+            if mtime < cutoff:
+                os.remove(log_path)
+        except Exception as e:
+            print(f"Failed to remove old log {log_path}: {e}")
+
+
 def main():
     """Main function to run the bot loop."""
     log.info("Capitol Trades Bot started. Press Ctrl+C to stop.")
+    cleanup_old_logs()  # Perform log cleanup at the start of the bot
     total_script_runs = 0
     total_politicians_ever_created = 0
     total_updates_ever_recorded = 0 # Combined trade and meta updates over all runs
