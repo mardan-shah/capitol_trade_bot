@@ -1,33 +1,88 @@
-## Running the Project with Docker
+# Capitol Trades Bot
 
-This project is containerized using Docker and can be run easily with Docker Compose. Below are the project-specific instructions and requirements:
+An automated scraper and tracker for politician trades on [Capitol Trades](https://www.capitoltrades.com). This bot periodically scans politician profiles, parses their latest trade data, and stores it in a MongoDB database for further analysis or real-time tracking.
 
-### Requirements
-- **Python Version:** The Dockerfile uses `python:3.12-slim` as the base image.
-- **Dependencies:** All Python dependencies are specified in `requirements.txt` and are installed into a virtual environment during the build process.
+## Features
 
-### Environment Variables
-- The project supports environment variables via a `.env` file. If you have environment-specific settings, create a `.env` file in the project root. Uncomment the `env_file` line in the `docker-compose.yml` to enable this.
+- **Automated Scraping:** Periodically scans the latest politician listing pages.
+- **Concurrent Processing:** Uses `asyncio` and `aiohttp` to fetch multiple profile pages concurrently.
+- **Smart Updates:** Only updates records when new trades are detected or metadata changes.
+- **Recent Trades Stack:** Maintains a capped collection of the most recent trades across all politicians.
+- **Robust Error Handling:** Includes timeouts, retries (via logic), and detailed logging.
+- **Docker Support:** Ready to be deployed as a containerized service.
 
-### Build and Run Instructions
-1. **Build and start the service:**
+## Prerequisites
+
+- **Python 3.12+** (if running locally)
+- **MongoDB:** A running MongoDB instance.
+
+## Setup & Installation
+
+### Local Setup
+
+1. **Clone the repository:**
    ```sh
-   docker compose up --build
+   git clone <repository-url>
+   cd capitol-trade-bot
    ```
-   This will build the image using the provided `DockerFile` and start the `bot` service.
 
-2. **Environment Variables:**
-   - If your application requires environment variables, ensure they are defined in a `.env` file at the project root.
-   - Uncomment the `env_file: ./.env` line in the `docker-compose.yml` if you need to pass these variables to the container.
+2. **Create a virtual environment:**
+   ```sh
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-### Special Configuration
-- The application runs as a non-root user (`appuser`) for improved security.
-- The entrypoint runs the bot via `python -m bot`.
-- No external services (such as databases) or persistent volumes are configured by default. If needed, add them to the `docker-compose.yml`.
+3. **Install dependencies:**
+   ```sh
+   pip install -r requirements.txt
+   ```
 
-### Ports
-- **No ports are exposed by default.** If your bot needs to expose a port, uncomment and configure the `ports` section in the `docker-compose.yml`.
+4. **Configure environment variables:**
+   - Copy the example environment file:
+     ```sh
+     cp example.env .env
+     ```
+   - Edit `.env` and provide your `MONGO_URI`.
+
+5. **Run the bot:**
+   ```sh
+   python -m bot
+   ```
+
+### Docker Setup
+
+The project is containerized using Docker and can be run easily with Docker Compose.
+
+1. **Prepare your `.env` file:**
+   Ensure you have a `.env` file in the project root with your `MONGO_URI`.
+
+2. **Configure Docker Compose:**
+   Uncomment the `env_file` line in `compose.yaml` to pass your environment variables to the container.
+
+3. **Build and start the service:**
+   ```sh
+   docker compose up --build -d
+   ```
+
+## Configuration
+
+The bot's behavior can be tuned in `bot/__main__.py`:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SEMAPHORE_LIMIT` | Max concurrent profile page fetches | 10 |
+| `MAX_PAGES_TO_SCAN` | Max politician listing pages to check per cycle | 3 |
+| `POLLING_INTERVAL_SECONDS` | Time between scan cycles | 3600 (1 hour) |
+| `REQUEST_TIMEOUT_SECONDS` | Timeout for HTTP requests | 30 |
+
+## Project Structure
+
+- `bot/`: Main package containing the bot logic.
+- `bot/__main__.py`: Entry point and core execution loop.
+- `requirements.txt`: Python dependencies.
+- `compose.yaml` & `DockerFile`: Docker configuration.
+- `example.env`: Template for required environment variables.
 
 ---
 
-_If you update dependencies or the application code, rebuild the image with `docker compose build` before restarting the service._
+_Disclaimer: This bot is for educational and research purposes only. Ensure compliance with the target website's Terms of Service and robots.txt._
